@@ -1,19 +1,19 @@
 # csharp-web-scraping
 Web Scraping With C#
 
-```csharp
+```bash
 dotnet --version
 ```
 
-```csharp
+```bash
 dotnet new console
 ```
 
-```csharp
+```bash
 dotnet add package HtmlAgilityPack
 ```
 
-```csharp
+```bash
 dotnet add package CsvHelper
 ```
 
@@ -35,7 +35,7 @@ public HtmlNodeCollection SelectNodes(string xpath);
 public HtmlNode SelectSingleNode(string xpath);
 ```
 
-```csharp
+```css
 //h3/a
 ```
 
@@ -72,11 +72,11 @@ static void Main(string[] args)
 }
 ```
 
-```csharp
+```bash
 dotnet run
 ```
 
-```csharp
+```
 Found 20 links
 ```
 
@@ -88,7 +88,7 @@ public class Book
 }
 ```
 
-```csharp
+```xpath
 //div[contains(@class,"product_main")]/p[@class="price_color"]
 ```
 
@@ -139,7 +139,7 @@ static void Main(string[] args)
 }
 ```
 
-```csharp
+```bash
 dotnet run
 ```
 
