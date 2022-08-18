@@ -88,7 +88,7 @@ public class Book
 }
 ```
 
-```xpath
+```
 //div[contains(@class,"product_main")]/p[@class="price_color"]
 ```
 
