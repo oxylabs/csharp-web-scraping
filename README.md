@@ -3,6 +3,7 @@
 
 [![Oxylabs promo code](https://user-images.githubusercontent.com/129506779/250792357-8289e25e-9c36-4dc0-a5e2-2706db797bb5.png)](https://oxylabs.go2cloud.org/aff_c?offer_id=7&aff_id=877&url_id=112)
 
+See the full article on our [website](https://oxylabs.io/blog/csharp-web-scraping), where we also go over how to scrape dynamic pages in C#.
 
 ## Setup Development environment
 
@@ -28,8 +29,13 @@ dotnet add package CsvHelper
 The first step of any web scraping program is to download the HTML of a web page. This HTML will be a string that you’ll need to convert into an object that can be processed further. The latter part is called parsing. Html Agility Pack can read and parse files from local files, HTML strings, any URL, or even a browser. 
 
 In our case, all we need to do is get HTML from a URL. Instead of using .NET native functions, Html Agility Pack provides a convenient class – HtmlWeb. This class offers a Load function that can take a URL and return an instance of the HtmlDocument class, which is also part of the package we use. With this information, we can write a function that takes a URL and returns an instance of HtmlDocument.
+The first step is to import the required library files. Open the `Program.cs` file and import the library files using the following code:
 
-Open `Program.cs` file and enter this function in the class Program:
+```csharp
+using HtmlAgilityPack;
+```
+
+Then, open `Program.cs` file and enter this function in the class Program:
 
 ```csharp
 // Parses the URL and returns HtmlDocument object
@@ -187,6 +193,11 @@ static void Main(string[] args)
 
 ## Exporting Data
 If you haven’t yet installed the `CsvHelper`, you can do this by running the command `dotnet add package CsvHelper` from within the terminal.
+After installation, import the `CsvHelper` class in your `Program.cs` file like this:
+```csharp
+using System.Globalization;
+using CsvHelper;
+```
 
 The export function is pretty straightforward. First, we need to create a `StreamWriter` and send the CSV file name as the parameter. Next, we will use this object to create a `CsvWriter`. Finally, we can use the `WriteRecords` function to write all the books in just one line of code. 
 
@@ -211,6 +222,75 @@ static void Main(string[] args)
     var bookLinks = GetBookLinks("http://books.toscrape.com/catalogue/category/books/mystery_3/index.html");
     var books = GetBookDetails(bookLinks);
     exportToCSV(books);
+}
+```
+
+Let’s bring together all the snippets and have a look at the complete code:
+```csharp
+using System.Globalization;
+using CsvHelper;
+using HtmlAgilityPack;
+
+namespace webscraping
+{
+
+
+
+    class Program
+    {
+        static HtmlDocument GetDocument(string url)
+        {
+            HtmlWeb web = new HtmlWeb();
+            HtmlDocument doc = web.Load(url);
+            return doc;
+        }
+        static List<string> GetBookLinks(string url)
+        {
+            var bookLinks = new List<string>();
+            HtmlDocument doc = GetDocument(url);
+            HtmlNodeCollection linkNodes = doc.DocumentNode.SelectNodes("//h3/a");
+            var baseUri = new Uri(url);
+            foreach (var link in linkNodes)
+            {
+                string href = link.Attributes["href"].Value;
+                bookLinks.Add(new Uri(baseUri, href).AbsoluteUri);
+            }
+            return bookLinks;
+        }
+        static List<Book> GetBookDetails(List<string> urls)
+        {
+            var books = new List<Book>();
+            foreach (var url in urls)
+            {
+                HtmlDocument document = GetDocument(url);
+                var titleXPath = "//h1";
+                var priceXPath = "//div[contains(@class,\"product_main\")]/p[@class=\"price_color\"]";
+                var book = new Book();
+                book.Title = document.DocumentNode.SelectSingleNode(titleXPath).InnerText;
+                book.Price = document.DocumentNode.SelectSingleNode(priceXPath).InnerText;
+                books.Add(book);
+            }
+            return books;
+        }
+        static void exportToCSV(List<Book> books)
+        {
+            using (var writer = new StreamWriter("books.csv"))
+            using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+            {
+                csv.WriteRecords(books);
+            }
+        }
+
+        static void Main(string[] args)
+        {
+            var bookLinks = GetBookLinks("http://books.toscrape.com/catalogue/category/books/mystery_3/index.html");
+            Console.WriteLine("Found {0} links", bookLinks.Count);
+            var books = GetBookDetails(bookLinks);
+            exportToCSV(books);
+        }
+
+
+    }
 }
 ```
 
